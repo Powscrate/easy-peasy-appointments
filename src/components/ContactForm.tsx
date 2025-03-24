@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, User, Mail, Phone, FileText } from "lucide-react";
 
 interface ContactFormProps {
   selectedDate: Date | undefined;
@@ -52,12 +52,13 @@ export function ContactForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 mt-8 animate-slide-up">
-      <h3 className="text-xl font-semibold">Vos informations</h3>
-      
+    <form onSubmit={handleSubmit} className="space-y-6 mt-4 animate-slide-up">
       <div className="space-y-4">
         <div className="grid gap-2">
-          <Label htmlFor="name">Nom complet <span className="text-red-500">*</span></Label>
+          <Label htmlFor="name" className="flex items-center gap-2">
+            <User className="h-4 w-4 text-primary" />
+            Nom complet <span className="text-red-500">*</span>
+          </Label>
           <Input
             id="name"
             placeholder="John Doe"
@@ -69,7 +70,10 @@ export function ContactForm({
         </div>
         
         <div className="grid gap-2">
-          <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
+          <Label htmlFor="email" className="flex items-center gap-2">
+            <Mail className="h-4 w-4 text-primary" />
+            Email <span className="text-red-500">*</span>
+          </Label>
           <Input
             id="email"
             type="email"
@@ -82,7 +86,10 @@ export function ContactForm({
         </div>
         
         <div className="grid gap-2">
-          <Label htmlFor="phone">Téléphone <span className="text-red-500">*</span></Label>
+          <Label htmlFor="phone" className="flex items-center gap-2">
+            <Phone className="h-4 w-4 text-primary" />
+            Téléphone <span className="text-red-500">*</span>
+          </Label>
           <Input
             id="phone"
             placeholder="06 12 34 56 78"
@@ -94,7 +101,10 @@ export function ContactForm({
         </div>
         
         <div className="grid gap-2">
-          <Label htmlFor="notes">Notes supplémentaires</Label>
+          <Label htmlFor="notes" className="flex items-center gap-2">
+            <FileText className="h-4 w-4 text-primary" />
+            Notes supplémentaires
+          </Label>
           <Textarea
             id="notes"
             placeholder="Informations complémentaires pour votre rendez-vous..."

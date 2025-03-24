@@ -1,12 +1,13 @@
 
 import React, { useState } from "react";
 import Header from "@/components/Header";
-import AppointmentDatePicker from "@/components/AppointmentDatePicker";
-import TimeSlotPicker from "@/components/TimeSlotPicker";
+import FullCalendarView from "@/components/FullCalendarView";
 import ContactForm from "@/components/ContactForm";
 import AppointmentConfirmation from "@/components/AppointmentConfirmation";
 import { Separator } from "@/components/ui/separator";
 import { Calendar, Clock } from "lucide-react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 type AppointmentData = {
   date: Date;
@@ -19,12 +20,11 @@ type AppointmentData = {
 
 const Index = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [appointmentData, setAppointmentData] = useState<AppointmentData | null>(null);
   const [step, setStep] = useState<"select-date-time" | "confirmation">("select-date-time");
 
-  const handleTimeSelected = (time: string) => {
-    setSelectedTime(time);
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date);
   };
 
   const handleFormSubmit = (formData: {
@@ -33,10 +33,10 @@ const Index = () => {
     phone: string;
     notes: string;
   }) => {
-    if (selectedDate && selectedTime) {
+    if (selectedDate) {
       setAppointmentData({
         date: selectedDate,
-        time: selectedTime,
+        time: format(selectedDate, "HH:mm"),
         ...formData,
       });
       setStep("confirmation");
@@ -47,7 +47,6 @@ const Index = () => {
 
   const handleNewAppointment = () => {
     setSelectedDate(undefined);
-    setSelectedTime(null);
     setAppointmentData(null);
     setStep("select-date-time");
   };
@@ -56,7 +55,7 @@ const Index = () => {
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-blue-50">
       <Header />
       
-      <div className="flex-1 container max-w-4xl px-4 sm:px-6 py-8 sm:py-12">
+      <div className="flex-1 container max-w-6xl px-4 sm:px-6 py-8 sm:py-12">
         <div className="glass rounded-2xl p-6 sm:p-8 shadow-sm">
           {step === "select-date-time" ? (
             <div className="space-y-8">
@@ -66,7 +65,7 @@ const Index = () => {
                   <h2 className="text-2xl font-semibold">Réservez votre rendez-vous</h2>
                 </div>
                 <p className="text-muted-foreground">
-                  Sélectionnez une date et un créneau horaire disponible
+                  Sélectionnez une date et un créneau horaire disponible directement sur le calendrier
                 </p>
               </div>
 
@@ -74,21 +73,31 @@ const Index = () => {
               
               <div className="space-y-8">
                 <div className="space-y-2">
-                  <h3 className="text-lg font-medium">1. Choisissez une date</h3>
-                  <AppointmentDatePicker date={selectedDate} setDate={setSelectedDate} />
+                  <h3 className="text-lg font-medium">1. Choisissez une date et un horaire</h3>
+                  <FullCalendarView 
+                    selectedDate={selectedDate} 
+                    onDateSelect={handleDateSelect} 
+                  />
                 </div>
                 
-                <TimeSlotPicker
-                  selectedDate={selectedDate}
-                  selectedTime={selectedTime}
-                  onTimeSelected={handleTimeSelected}
-                />
-                
-                <ContactForm
-                  selectedDate={selectedDate}
-                  selectedTime={selectedTime}
-                  onSubmit={handleFormSubmit}
-                />
+                {selectedDate && (
+                  <div className="animate-fade-in space-y-2">
+                    <h3 className="text-lg font-medium flex items-center gap-2">
+                      <Clock className="h-5 w-5 text-primary" />
+                      2. Confirmez vos informations
+                    </h3>
+                    <div className="glass p-4 rounded-lg mb-4">
+                      <p className="font-medium">
+                        Date et heure sélectionnées: {format(selectedDate, "EEEE d MMMM à HH:mm", { locale: fr })}
+                      </p>
+                    </div>
+                    <ContactForm
+                      selectedDate={selectedDate}
+                      selectedTime={format(selectedDate, "HH:mm")}
+                      onSubmit={handleFormSubmit}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           ) : (
