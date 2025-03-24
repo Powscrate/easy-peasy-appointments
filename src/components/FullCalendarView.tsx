@@ -8,37 +8,55 @@ import { fr } from "date-fns/locale";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
+interface Appointment {
+  date: Date;
+  time: string;
+  name: string;
+  email: string;
+  phone: string;
+  notes: string;
+}
+
 interface FullCalendarViewProps {
   onDateSelect: (date: Date) => void;
   selectedDate: Date | undefined;
+  appointments?: Appointment[];
 }
 
-const FullCalendarView = ({ onDateSelect, selectedDate }: FullCalendarViewProps) => {
+const FullCalendarView = ({ 
+  onDateSelect, 
+  selectedDate,
+  appointments = []
+}: FullCalendarViewProps) => {
   const [events, setEvents] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
-  // Simulate fetching existing appointments
+  // Convert appointments to calendar events
   useEffect(() => {
-    // In a real application, you would fetch this data from your backend
-    const demoEvents = [
-      {
-        title: "Rendez-vous",
-        start: new Date(new Date().setDate(new Date().getDate() + 1)).setHours(10, 0),
-        end: new Date(new Date().setDate(new Date().getDate() + 1)).setHours(11, 0),
-      },
-      {
-        title: "Rendez-vous",
-        start: new Date(new Date().setDate(new Date().getDate() + 2)).setHours(14, 30),
-        end: new Date(new Date().setDate(new Date().getDate() + 2)).setHours(15, 30),
-      },
-      {
-        title: "Rendez-vous",
-        start: new Date(new Date().setDate(new Date().getDate() + 3)).setHours(9, 0),
-        end: new Date(new Date().setDate(new Date().getDate() + 3)).setHours(10, 0),
-      },
-    ];
+    // Create events array from appointments
+    const appointmentEvents = appointments.map(appointment => ({
+      title: "Réservé",
+      start: appointment.date,
+      end: new Date(new Date(appointment.date).setHours(
+        new Date(appointment.date).getHours() + 1
+      )),
+      backgroundColor: "#10b981", // green color for booked appointments
+      borderColor: "#10b981",
+      extendedProps: {
+        name: appointment.name,
+        email: appointment.email,
+        phone: appointment.phone,
+        notes: appointment.notes
+      }
+    }));
     
-    setEvents(demoEvents);
-  }, []);
+    // Simulate API loading for demo purposes
+    setIsLoading(true);
+    setTimeout(() => {
+      setEvents(appointmentEvents);
+      setIsLoading(false);
+    }, 600);
+  }, [appointments]);
 
   // Add selected date as an event with a different color
   const displayEvents = selectedDate
@@ -93,6 +111,29 @@ const FullCalendarView = ({ onDateSelect, selectedDate }: FullCalendarViewProps)
     onDateSelect(selectedDate);
   };
 
+  const handleEventClick = (clickInfo: any) => {
+    const event = clickInfo.event;
+    const extendedProps = event.extendedProps;
+
+    if (extendedProps && extendedProps.name) {
+      toast.info(`Réservation: ${extendedProps.name}`, {
+        description: `${format(event.start, "EEEE d MMMM à HH:mm", { locale: fr })}`
+      });
+    }
+  };
+
+  // Render loading state
+  if (isLoading) {
+    return (
+      <div className="full-calendar-container animate-fade-in bg-white/30 backdrop-blur-sm rounded-lg p-4 flex justify-center items-center h-[500px]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+          <p className="text-sm text-muted-foreground">Chargement du calendrier...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="full-calendar-container animate-fade-in">
       <FullCalendar
@@ -121,6 +162,7 @@ const FullCalendarView = ({ onDateSelect, selectedDate }: FullCalendarViewProps)
         nowIndicator={true}
         select={handleDateSelect}
         events={displayEvents}
+        eventClick={handleEventClick}
         eventColor="#3b82f6"
         height="auto"
         businessHours={{
